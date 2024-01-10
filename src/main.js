@@ -55,10 +55,10 @@ async function run() {
     */
 
     console.log(`Tests completed with status: ${result.status}`);
-    console.log(result);
+    console.log(result.result);
 
-    if (result.status === 'error') {
-      throw new Error(result.error);
+    if (result.result.status === 'error' || result.statusCode !== 200) {
+      throw new Error(result?.result?.error || `Error: ${result.statusCode}`);
     }
 
     core.setOutput(`All tests passed`);
