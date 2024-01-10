@@ -1,18 +1,19 @@
-name: 'The name of your action here'
+name: 'Click AI - Run Tests'
 description: 'Provide a description here'
-author: 'Your name or organization here'
+author: 'Click AI'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  tests:
+    description: 'List of test IDs to run, newline separated'
     required: true
-    default: '1000'
+  apiKey:
+    description: 'Your API key'
+    required: true
 
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+branding:
+  icon: 'fast-forward'
+  color: 'yellow'
 
 runs:
   using: node20

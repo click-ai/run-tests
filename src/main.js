@@ -1,30 +1,67 @@
-const core = require('@actions/core')
-const { wait } = require('./wait')
-
+const core = require('@actions/core');
+const httpm = require('@actions/http-client');
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
   try {
-    const ms = core.getInput('milliseconds', { required: true })
+    const tests = core.getInput('tests', {
+      required: true,
+      trimWhitespace: true
+    });
+    const apiKey = core.getInput('apiKey', {
+      required: true,
+      trimWhitespace: true
+    });
 
+    const automationIds = tests.split(/\r|\n/).map(line => line.trim());
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    core.debug(`Running tests: ${automationIds.join(', ')}`);
 
     // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const client = new httpm.HttpClient('Github Actions: run-tests', [], {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const result = await client.postJson(
+      `https://api.useclickai.com/api/evals/scheduleSync`,
+      {
+        automationIds
+      }
+    );
+
+    /* Result is:
+    {
+      status: "error" | "success";
+      results: {
+          status: "error" | "success" | "planned" | "running" | "processing-video";
+          duration: number;
+          startedAt?: string | undefined;
+          finishedAt?: string | undefined;
+          videoFilePath?: string | undefined;
+          error?: string | undefined;
+      }[];
+      error?: string | undefined;
+    }
+    
+    */
+
+    if (result.status === 'error') {
+      throw new Error(result.error);
+    }
+
+    core.setOutput(`All tests passed`);
   } catch (error) {
     // Fail the workflow run if an error occurs
-    core.setFailed(error.message)
+    core.setFailed(error.message);
   }
 }
 
 module.exports = {
   run
-}
+};
