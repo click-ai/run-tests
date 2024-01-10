@@ -10,6 +10,9 @@ inputs:
   apiKey:
     description: 'Your API key'
     required: true
+  input:
+    description: 'Input to the action'
+    required: false
 
 branding:
   icon: 'fast-forward'

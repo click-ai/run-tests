@@ -15,6 +15,13 @@ async function run() {
       trimWhitespace: true
     });
 
+    const input = core.getInput('input', {
+      required: false,
+      trimWhitespace: true
+    });
+
+    console.log(`Input: ${input}`);
+
     const automationIds = tests
       .split(/[\r\n,]+/)
       .map(line => line.trim())
