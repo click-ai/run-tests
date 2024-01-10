@@ -11,6 +11,11 @@
     tests: |-
       65942917c16ba99bb2b38f2f
       659dc7bcdceb9d988c9aa790
+    input: |-
+      url=staging.example.com
+      email=test@example.com
+      password=12345678
+
 ```
 
 ### Inputs
@@ -19,3 +24,4 @@
  ------- | ----------------------------------------------- |
  `tests` | **[Required]** List of test IDs to run.         |
  `apiKey`| **[Required]** Your Click AI API key.           |
+ `input` | **[Optional]** Input to pass to the test.       |
