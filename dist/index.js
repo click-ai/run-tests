@@ -24722,9 +24722,12 @@ async function run() {
       trimWhitespace: true
     });
 
-    const automationIds = tests.split(/\r|\n/).map(line => line.trim());
+    const automationIds = tests
+      .split(/[\r\n,]+/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Running tests: ${automationIds.join(', ')}`);
+    core.info(`Running tests: ${automationIds.join(', ')}`);
 
     // Log the current timestamp, wait, then log the new timestamp
 
@@ -24757,6 +24760,9 @@ async function run() {
     }
     
     */
+
+    console.log(`Tests completed with status: ${result.status}`);
+    console.log(result);
 
     if (result.status === 'error') {
       throw new Error(result.error);
