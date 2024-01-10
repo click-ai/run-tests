@@ -20,12 +20,22 @@ async function run() {
       trimWhitespace: true
     });
 
-    console.log(`Input: ${input}`);
-
     const automationIds = tests
       .split(/[\r\n,]+/)
       .map(line => line.trim())
       .filter(line => line.length > 0);
+
+    const inputMap = input
+      .trim()
+      .split(/[\r\n,]+/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .map(line => line.split('='))
+      .reduce((acc, [key, value]) => {
+        acc[key] = value;
+        return acc;
+      }, {});
+
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.info(`Running tests: ${automationIds.join(', ')}`);
 
@@ -40,9 +50,7 @@ async function run() {
 
     const result = await client.postJson(
       `https://api.useclickai.com/api/evals/scheduleSync`,
-      {
-        automationIds
-      }
+      { automationIds, input: inputMap }
     );
 
     /* Result is:
