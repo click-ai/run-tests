@@ -15,7 +15,10 @@ async function run() {
       trimWhitespace: true
     });
 
-    const automationIds = tests.split(/[\r\n,]+/).map(line => line.trim());
+    const automationIds = tests
+      .split(/[\r\n,]+/)
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Running tests: ${automationIds.join(', ')}`);
 
