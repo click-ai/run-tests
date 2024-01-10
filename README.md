@@ -15,9 +15,7 @@
 
 ### Inputs
 
-| name    | description                                     |
-| ------- | ----------------------------------------------- |
-| `tests` | **[Required]** List of test IDs to run.         |
-| ------- | ----------------------------------------------- |
-| `apiKey`| **[Required]** Your Click AI API key.           |
-| ------- | ----------------------------------------------- |
+ name    | description                                     |
+ ------- | ----------------------------------------------- |
+ `tests` | **[Required]** List of test IDs to run.         |
+ `apiKey`| **[Required]** Your Click AI API key.           |
