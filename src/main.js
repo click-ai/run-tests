@@ -21,6 +21,7 @@ async function run() {
     });
 
     const automationIds = JSON.parse(tests.trim());
+    console.log(`Tests: ${automationIds}`);
     // Verify automationIds is string[][]
     if (
       !Array.isArray(automationIds) ||
@@ -29,6 +30,7 @@ async function run() {
     ) {
       throw new Error('tests must be an array of arrays of strings');
     }
+    core.info(`Running tests: ${automationIds.flat().join(', ')}`);
 
     const inputMap = input
       .trim()
@@ -40,11 +42,6 @@ async function run() {
         acc[key] = value;
         return acc;
       }, {});
-
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.info(`Running tests: ${automationIds.flat().join(', ')}`);
-
-    // Log the current timestamp, wait, then log the new timestamp
 
     for (const automationArray of automationIds) {
       const client = new httpm.HttpClient('Github Actions: run-tests', [], {
