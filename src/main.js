@@ -21,7 +21,7 @@ async function run() {
     });
 
     const automationIds = JSON.parse(tests.trim());
-    console.log(`Tests: ${automationIds}`);
+    core.info(`Tests: ${automationIds}`);
     // Verify automationIds is string[][]
     if (
       !Array.isArray(automationIds) ||
@@ -72,8 +72,8 @@ async function run() {
         
       */
 
-      console.log(`Tests completed with status: ${result.status}`);
-      console.log(result.result);
+      core.info(`Tests completed with status: ${result.status}`);
+      core.info(result.result);
 
       if (result.result.status === 'error' || result.statusCode !== 200) {
         throw new Error(result?.result?.error || `Error: ${result.statusCode}`);
