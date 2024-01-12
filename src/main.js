@@ -20,10 +20,15 @@ async function run() {
       trimWhitespace: true
     });
 
-    const automationIds = tests
-      .split(/[\r\n,]+/)
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+    const automationIds = JSON.parse(tests.trim());
+    // Verify automationIds is string[][]
+    if (
+      !Array.isArray(automationIds) ||
+      !automationIds.every(Array.isArray) ||
+      !automationIds.flat().every(id => typeof id === 'string')
+    ) {
+      throw new Error('tests must be an array of arrays of strings');
+    }
 
     const inputMap = input
       .trim()
@@ -41,39 +46,43 @@ async function run() {
 
     // Log the current timestamp, wait, then log the new timestamp
 
-    const client = new httpm.HttpClient('Github Actions: run-tests', [], {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      }
-    });
+    for (const automationArray of automationIds) {
+      const client = new httpm.HttpClient('Github Actions: run-tests', [], {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
-    const result = await client.postJson(
-      `https://api.useclickai.com/api/evals/scheduleSync`,
-      { automationIds, input: inputMap }
-    );
+      const result = await client.postJson(
+        `https://api.useclickai.com/api/evals/scheduleSync`,
+        { automationIds: automationArray, input: inputMap }
+      );
 
-    /* Result is:
-    {
-      status: "error" | "success";
-      results: {
-          status: "error" | "success" | "planned" | "running" | "processing-video";
-          duration: number;
-          startedAt?: string | undefined;
-          finishedAt?: string | undefined;
-          videoFilePath?: string | undefined;
+      /* Result is:
+        {
+          status: "error" | "success";
+          results: {
+              status: "error" | "success" | "planned" | "running" | "processing-video";
+              duration: number;
+              startedAt?: string | undefined;
+              finishedAt?: string | undefined;
+              videoFilePath?: string | undefined;
+              error?: string | undefined;
+          }[];
           error?: string | undefined;
-      }[];
-      error?: string | undefined;
-    }
-    
-    */
+        }
+        
+      */
 
-    console.log(`Tests completed with status: ${result.status}`);
-    console.log(result.result);
+      console.log(`Tests completed with status: ${result.status}`);
+      console.log(result.result);
 
-    if (result.result.status === 'error' || result.statusCode !== 200) {
-      throw new Error(result?.result?.error || `Error: ${result.statusCode}`);
+      if (result.result.status === 'error' || result.statusCode !== 200) {
+        throw new Error(result?.result?.error || `Error: ${result.statusCode}`);
+      }
+
+      core.setOutput(`All tests: ${automationArray.join(', ')} passed`);
     }
 
     core.setOutput(`All tests passed`);
