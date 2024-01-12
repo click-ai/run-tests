@@ -42,7 +42,7 @@ async function run() {
       }, {});
 
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.info(`Running tests: ${automationIds.join(', ')}`);
+    core.info(`Running tests: ${automationIds.flat().join(', ')}`);
 
     // Log the current timestamp, wait, then log the new timestamp
 
