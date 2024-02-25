@@ -34173,7 +34173,7 @@ async function run() {
 
     console.log('Starting proxy to urls:', proxyUrls.join(', '));
 
-    await clickai.runTunnelMultiple({ proxyUrls, cloudflaredPath });
+    await clickai.runTunnelMultiple({ urls: proxyUrls, cloudflaredPath });
 
     console.log('Proxy started, scheduling tests');
 
