@@ -6,7 +6,7 @@ author: 'Click AI'
 inputs:
   tests:
     description: 'List of test IDs to run, newline separated'
-    required: true
+    required: false
   apiKey:
     description: 'Your API key'
     required: true
