@@ -13,6 +13,9 @@ inputs:
   input:
     description: 'Input to the action'
     required: false
+  proxyUrls:
+    description: 'List of URLs to reverse proxy, newline separated'
+    required: false
 
 branding:
   icon: 'fast-forward'
