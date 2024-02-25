@@ -44,7 +44,7 @@ async function run() {
 
     const cloudflaredPath = await downloadCloudflared();
 
-    console.log('Starting proxy to urls:', proxyUrlsArray.join(', '));
+    console.log('Starting proxy to urls:', proxyUrls.join(', '));
 
     await clickai.runTunnelMultiple({ proxyUrls, cloudflaredPath });
 
