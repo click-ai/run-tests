@@ -1,5 +1,5 @@
-import * as core from '@actions/core';
-import * as clickai from 'clickai';
+import core from '@actions/core';
+import clickai from 'clickai';
 import { downloadCloudflared } from './tunnel';
 
 function checkIsUrl(url: string) {
