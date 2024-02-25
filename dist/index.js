@@ -34299,9 +34299,9 @@ const tc = __importStar(__nccwpck_require__(7784));
 const io = __importStar(__nccwpck_require__(7436));
 const path = __importStar(__nccwpck_require__(1017));
 const os = __importStar(__nccwpck_require__(2037));
-const CF_MAC = 'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-darwin-amd64.tgz';
-const CF_Linux = 'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-linux-amd64';
-const CF_Win = 'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-windows-amd64.exe';
+const CF_MAC = 'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-darwin-amd64.tgz';
+const CF_Linux = 'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-linux-amd64';
+const CF_Win = 'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-windows-amd64.exe';
 async function downloadCloudflared() {
     let link = CF_Win;
     let ext = '';

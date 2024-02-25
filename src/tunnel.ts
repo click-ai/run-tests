@@ -6,11 +6,11 @@ import * as path from 'path';
 import * as os from 'os';
 
 const CF_MAC =
-  'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-darwin-amd64.tgz';
+  'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-darwin-amd64.tgz';
 const CF_Linux =
-  'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-linux-amd64';
+  'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-linux-amd64';
 const CF_Win =
-  'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-windows-amd64.exe';
+  'https://github.com/cloudflare/cloudflared/releases/download/2024.2.1/cloudflared-windows-amd64.exe';
 
 export async function downloadCloudflared() {
   let link = CF_Win;
