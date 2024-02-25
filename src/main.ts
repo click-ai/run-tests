@@ -110,8 +110,10 @@ export async function run() {
     core.info(`All tests passed`);
   } catch (error) {
     // Fail the workflow run if an error occurs
+    stopTunnelArray.forEach(stopTunnel => stopTunnel());
+    stopTunnelArray.length = 0;
     core.setFailed((error as Error).message);
   }
-
   stopTunnelArray.forEach(stopTunnel => stopTunnel());
+  stopTunnelArray.length = 0;
 }

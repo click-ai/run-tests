@@ -5693,6 +5693,7 @@ function runTunnel({ url, cloudflaredPath = "cloudflared", }) {
         "--http-host-header",
         urlObj.host,
     ]);
+    let isStopped = false;
     const urlPromise = new Promise((resolve, reject) => {
         let data = "";
         function processPatch(patch) {
@@ -5707,11 +5708,20 @@ function runTunnel({ url, cloudflaredPath = "cloudflared", }) {
             reject(err);
         });
         cloudflared.on("close", (code) => {
+            if (isStopped)
+                return;
             console.log(`child process exited with code ${code}`);
             console.log(data);
         });
     });
-    return { url, urlPromise, stop: () => cloudflared.kill() };
+    return {
+        url,
+        urlPromise,
+        stop: () => {
+            isStopped = true;
+            cloudflared.kill();
+        },
+    };
 }
 exports.runTunnel = runTunnel;
 function runTunnelMultiple({ urls, cloudflaredPath = "cloudflared", }) {
@@ -5759,7 +5769,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.scheduleTests = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
-const hasStdout = false;
+const hasStdout = typeof process !== "undefined" && process.stdout;
 class ConsoleLineManager {
     constructor() {
         this.lineMap = {};
@@ -34258,9 +34268,12 @@ async function run() {
     }
     catch (error) {
         // Fail the workflow run if an error occurs
+        stopTunnelArray.forEach(stopTunnel => stopTunnel());
+        stopTunnelArray.length = 0;
         core.setFailed(error.message);
     }
     stopTunnelArray.forEach(stopTunnel => stopTunnel());
+    stopTunnelArray.length = 0;
 }
 exports.run = run;
 
