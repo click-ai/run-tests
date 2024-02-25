@@ -1,13 +1,25 @@
 const core = require('@actions/core');
-const httpm = require('@actions/http-client');
+const clickai = require('clickai');
+const { downloadCloudflared } = require('./tunnel');
+
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
+
+function checkIsUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function run() {
   try {
     const tests = core.getInput('tests', {
-      required: true,
+      required: false,
       trimWhitespace: true
     });
     const apiKey = core.getInput('apiKey', {
@@ -19,6 +31,24 @@ async function run() {
       required: false,
       trimWhitespace: true
     });
+
+    const proxyUrlsString = core.getInput('proxyUrls', {
+      required: false,
+      trimWhitespace: true
+    });
+
+    const proxyUrls = proxyUrlsString
+      .split(/[\r\n,]+/)
+      .map(row => row.trim())
+      .filter(checkIsUrl);
+
+    const cloudflaredPath = await downloadCloudflared();
+
+    console.log('Starting proxy to urls:', proxyUrlsArray.join(', '));
+
+    await clickai.runTunnelMultiple({ proxyUrls, cloudflaredPath });
+
+    console.log('Proxy started, scheduling tests');
 
     const automationIds = JSON.parse(tests.trim());
     core.info(`Tests: ${automationIds}`);
@@ -44,34 +74,12 @@ async function run() {
       }, {});
 
     for (const automationArray of automationIds) {
-      const client = new httpm.HttpClient('Github Actions: run-tests', [], {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
+      const result = clickai.scheduleTests({
+        authToken: apiKey,
+        automationIds: automationArray,
+        inputMap,
+        proxyMap: proxyUrlsArray
       });
-
-      const result = await client.postJson(
-        `https://api.useclickai.com/api/evals/scheduleSync`,
-        { automationIds: automationArray, input: inputMap }
-      );
-
-      /* Result is:
-        {
-          status: "error" | "success";
-          results: {
-              status: "error" | "success" | "planned" | "running" | "processing-video";
-              duration: number;
-              startedAt?: string | undefined;
-              finishedAt?: string | undefined;
-              videoFilePath?: string | undefined;
-              error?: string | undefined;
-          }[];
-          error?: string | undefined;
-        }
-        
-      */
-
       core.info(`Tests completed with status: ${result.status}`);
       core.info(result.result);
 
