@@ -34159,13 +34159,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const clickai_1 = __importDefault(__nccwpck_require__(1859));
+const clickai = __importStar(__nccwpck_require__(1859));
 const tunnel_1 = __nccwpck_require__(4952);
 function checkIsUrl(url) {
     try {
@@ -34203,7 +34200,7 @@ function run() {
             console.log('Starting proxy to urls:', proxyUrls.join(', '));
             let proxyMap = undefined;
             if (proxyUrls.length > 0) {
-                const res = yield clickai_1.default.runTunnelMultiple({
+                const res = yield clickai.runTunnelMultiple({
                     urls: proxyUrls,
                     cloudflaredPath
                 });
@@ -34235,7 +34232,7 @@ function run() {
                 return acc;
             }, {});
             for (const automationArray of automationIds) {
-                const result = yield clickai_1.default.scheduleTests(Object.assign(Object.assign({ authToken: apiKey }, (automationArray.length > 0 && { automationIds: automationArray })), { inputMap,
+                const result = yield clickai.scheduleTests(Object.assign(Object.assign({ authToken: apiKey }, (automationArray.length > 0 && { automationIds: automationArray })), { inputMap,
                     proxyMap }));
                 core.info(`Tests completed with status: ${result.status}`);
                 if (result.status === 'error') {
