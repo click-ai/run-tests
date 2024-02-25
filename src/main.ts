@@ -12,6 +12,8 @@ function checkIsUrl(url: string) {
 }
 
 export async function run() {
+  let stopTunnelArray: (() => void)[] = [];
+
   try {
     const tests = core.getInput('tests', {
       required: false,
@@ -42,19 +44,18 @@ export async function run() {
     console.log('Starting proxy to urls:', proxyUrls.join(', '));
 
     let proxyMap: Record<string, string> | undefined = undefined;
+
     if (proxyUrls.length > 0) {
       const res = await clickai.runTunnelMultiple({
         urls: proxyUrls,
         cloudflaredPath
       });
 
-      proxyMap = res.reduce(
-        (acc, t) => {
-          acc[t.url] = t.publicUrl;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      res.forEach(tunnel => {
+        if (!proxyMap) proxyMap = {};
+        proxyMap[tunnel.url] = tunnel.publicUrl;
+        stopTunnelArray.push(tunnel.stop);
+      });
     }
 
     console.log('Proxy started, scheduling tests');
@@ -100,7 +101,7 @@ export async function run() {
       core.info(`Tests completed with status: ${result.status}`);
 
       if (result.status === 'error') {
-        throw new Error(`Error`);
+        throw new Error('Tests failed');
       }
 
       core.info(`All tests: ${automationArray.join(', ')} passed`);
@@ -111,4 +112,6 @@ export async function run() {
     // Fail the workflow run if an error occurs
     core.setFailed((error as Error).message);
   }
+
+  stopTunnelArray.forEach(stopTunnel => stopTunnel());
 }

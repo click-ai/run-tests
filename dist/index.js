@@ -34182,6 +34182,7 @@ function checkIsUrl(url) {
     }
 }
 async function run() {
+    let stopTunnelArray = [];
     try {
         const tests = core.getInput('tests', {
             required: false,
@@ -34211,10 +34212,12 @@ async function run() {
                 urls: proxyUrls,
                 cloudflaredPath
             });
-            proxyMap = res.reduce((acc, t) => {
-                acc[t.url] = t.publicUrl;
-                return acc;
-            }, {});
+            res.forEach(tunnel => {
+                if (!proxyMap)
+                    proxyMap = {};
+                proxyMap[tunnel.url] = tunnel.publicUrl;
+                stopTunnelArray.push(tunnel.stop);
+            });
         }
         console.log('Proxy started, scheduling tests');
         let automationIds = [[]];
@@ -34247,7 +34250,7 @@ async function run() {
             });
             core.info(`Tests completed with status: ${result.status}`);
             if (result.status === 'error') {
-                throw new Error(`Error`);
+                throw new Error('Tests failed');
             }
             core.info(`All tests: ${automationArray.join(', ')} passed`);
         }
@@ -34257,6 +34260,7 @@ async function run() {
         // Fail the workflow run if an error occurs
         core.setFailed(error.message);
     }
+    stopTunnelArray.forEach(stopTunnel => stopTunnel());
 }
 exports.run = run;
 
