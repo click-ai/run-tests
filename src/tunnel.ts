@@ -1,9 +1,10 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const tc = require('@actions/tool-cache');
-const io = require('@actions/io');
-const path = require('path');
-const os = require('os');
+import core from '@actions/core';
+import exec from '@actions/exec';
+import tc from '@actions/tool-cache';
+import io from '@actions/io';
+import path from 'path';
+import os from 'os';
+import { fileURLToPath } from 'url';
 
 const CF_MAC =
   'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-darwin-amd64.tgz';
@@ -35,13 +36,11 @@ export async function downloadCloudflared() {
     return `${workingDir}/cloudflared`;
   }
   if (os.platform() === 'linux') {
-    await io.mv(img, path.join(workingDir, './cloudflared'));
-    await exec.exec('sh', [], {
-      input: `chmod +x ${path.join(workingDir, './cloudflared')}`
-    });
-    return `${workingDir}/cloudflared`;
+    await io.mv(img, path.join(workingDir, 'cloudflared'));
+    await exec.exec(`chmod +x ${path.join(workingDir, 'cloudflared')}`);
+    return path.join(workingDir, 'cloudflared');
   }
-  await io.mv(img, path.join(workingDir, './cloudflared.exe'));
+  await io.mv(img, path.join(workingDir, 'cloudflared.exe'));
 
   return `${workingDir}/cloudflared.exe`;
 }
