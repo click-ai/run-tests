@@ -2072,10 +2072,10 @@ cjs-module-lexer@^1.0.0:
   resolved "https://registry.yarnpkg.com/cjs-module-lexer/-/cjs-module-lexer-1.2.3.tgz#6c370ab19f8a3394e318fe682686ec0ac684d107"
   integrity sha512-0TNiGstbQmCFwt4akjjBg5pLRTSyj/PkWQ1ZoO2zntmg9yLqSRxwEa4iCfQLGjqhiqBfOJa7W/E8wfGrTDmlZQ==
 
-clickai@^1.0.8:
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/clickai/-/clickai-1.0.8.tgz#3518bc5090a8dabdc1529db4d33ca377176f37a0"
-  integrity sha512-CpS8ucNUlBGlBYcfS/O4ycUp6mW5K4ao2joSAgUTujIu3cGBAxlGrjnnQ8GHziJ119sKSHe1+WJJByYWy8NdsQ==
+clickai@^1.0.9:
+  version "1.0.9"
+  resolved "https://registry.yarnpkg.com/clickai/-/clickai-1.0.9.tgz#2dc37f99a4fea734de887d6f850e3ae0d44aff83"
+  integrity sha512-8UcJRNvRL5rmm0tHdVLzWwpM7i2gypxc3dchRPgDiCxmy6CDeYQTsz9vjUIFuOhOUHwvo+p8VFyaMCLCrJkkOQ==
   dependencies:
     "@types/node" "^20.11.19"
     axios "^1.6.7"
