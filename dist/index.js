@@ -5759,6 +5759,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.scheduleTests = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
+const hasStdout = false;
 class ConsoleLineManager {
     constructor() {
         this.lineMap = {};
@@ -5794,6 +5795,8 @@ class ConsoleLineManager {
         this.renderQueue = false;
     }
     startRenderLoop() {
+        if (!hasStdout)
+            return;
         this.interval = setInterval(() => {
             this.updateLoaders();
             if (this.renderQueue) {
@@ -5802,6 +5805,8 @@ class ConsoleLineManager {
         }, this.renderInterval);
     }
     stopRenderLoop() {
+        if (!hasStdout)
+            return;
         if (!this.interval)
             return;
         clearInterval(this.interval);
@@ -5809,6 +5814,7 @@ class ConsoleLineManager {
         this._render();
     }
     set(item) {
+        var _a;
         const { _id, status } = item;
         let isNew = !(_id in this.lineMap);
         let postfix = "";
@@ -5820,8 +5826,19 @@ class ConsoleLineManager {
             postfix = "🎥";
         if (status.includes("failed"))
             postfix = "🥺👉👈";
+        const newStatus = postfix ? `${status} ${postfix}` : status;
+        const previousStatus = (_a = this.lineMap[_id]) === null || _a === void 0 ? void 0 : _a.status;
         this.lineMap[_id] = Object.assign(Object.assign({}, item), { status: postfix ? `${status} ${postfix}` : status, i: isNew ? ++this.totalLines : this.lineMap[_id].i });
-        this._scheduleRender();
+        if (hasStdout) {
+            this._scheduleRender();
+        }
+        else {
+            if (!newStatus.includes("error") && !newStatus.includes("success"))
+                return;
+            if (isNew || previousStatus !== newStatus) {
+                console.log(`${item.title}: ${newStatus}`);
+            }
+        }
     }
     updateLoaders() {
         const loader = this.loaders[this.loaderIndex];
