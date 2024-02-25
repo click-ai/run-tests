@@ -24,7 +24,8 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && yarn run bundle",
+    "bundle": "ncc build src/index.ts --license licenses.txt",
     "test": "(jest && make-coverage-badge --output-path ./badges/coverage.svg) || make-coverage-badge --output-path ./badges/coverage.svg"
   },
   "license": "MIT",
