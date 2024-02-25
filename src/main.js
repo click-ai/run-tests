@@ -78,7 +78,7 @@ async function run() {
         authToken: apiKey,
         automationIds: automationArray,
         inputMap,
-        proxyMap: proxyUrlsArray
+        proxyMap: proxyUrls
       });
       core.info(`Tests completed with status: ${result.status}`);
       core.info(result.result);
