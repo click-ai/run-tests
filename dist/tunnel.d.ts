@@ -1,1 +1,1 @@
-export declare function downloadCloudflared(): Promise<string>;
+export declare function downloadCloudflared(): Promise<any>;

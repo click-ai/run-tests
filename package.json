@@ -17,9 +17,7 @@
     "Actions",
     "JavaScript"
   ],
-  "exports": {
-    ".": "./dist/index.js"
-  },
+  "main": "dist/index.js",
   "engines": {
     "node": ">=18"
   },
