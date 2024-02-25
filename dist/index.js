@@ -5765,11 +5765,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.scheduleTests = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
-const hasStdout = typeof process !== "undefined" && process.stdout;
+const hasStdout = typeof ((_a = process === null || process === void 0 ? void 0 : process.stdout) === null || _a === void 0 ? void 0 : _a.clearLine) === "function";
 class ConsoleLineManager {
     constructor() {
         this.lineMap = {};
