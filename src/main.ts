@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import clickai from 'clickai';
 import { downloadCloudflared } from './tunnel';
 

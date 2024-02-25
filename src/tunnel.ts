@@ -1,10 +1,9 @@
-import core from '@actions/core';
-import exec from '@actions/exec';
-import tc from '@actions/tool-cache';
-import io from '@actions/io';
-import path from 'path';
-import os from 'os';
-import { fileURLToPath } from 'url';
+import * as core from '@actions/core';
+import * as exec from '@actions/exec';
+import * as tc from '@actions/tool-cache';
+import * as io from '@actions/io';
+import * as path from 'path';
+import * as os from 'os';
 
 const CF_MAC =
   'https://github.com/cloudflare/cloudflared/releases/download/2022.10.3/cloudflared-darwin-amd64.tgz';
