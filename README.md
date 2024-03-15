@@ -9,7 +9,7 @@
   with:
     apiKey: ${{ secrets.CLICK_AI_API_KEY }}
     tests: |-
-      # This will run all tests simultaneously
+      # This will run all tests simultaneously, will run all tests if the array is empty
       [[
         "65942917c16ba99bb2b38f2f",
         "659dc7bcdceb9d988c9aa790"
@@ -27,8 +27,11 @@
           "659dc7bcdceb9d988c9aa791"
         ] <-- second array of tests
       ]
+    proxyUrls: |- 
+        # Optional, if you need test a localhost server, we will expose it to the internet
+        http://localhost:3000
     input: |-
-      url=staging.example.com
+      url=http://localhost:3000
       email=test@example.com
       password=12345678
 
