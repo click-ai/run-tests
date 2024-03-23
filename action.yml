@@ -4,9 +4,9 @@ author: 'Click AI'
 
 # Define your inputs here.
 inputs:
-  tests:
-    description: 'List of test IDs to run, newline separated'
-    required: false
+  suiteId:
+    description: 'Suite ID to run'
+    required: true
   apiKey:
     description: 'Your API key'
     required: true

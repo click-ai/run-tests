@@ -5647,22 +5647,23 @@ module.exports = {
 
 /***/ }),
 
-/***/ 1859:
+/***/ 2395:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.scheduleTests = exports.runTunnelMultiple = void 0;
-const runTunnel_1 = __nccwpck_require__(9362);
+exports.scheduleSuite = exports.scheduleTestsByIds = exports.runTunnelMultiple = void 0;
+const runTunnel_1 = __nccwpck_require__(1778);
 Object.defineProperty(exports, "runTunnelMultiple", ({ enumerable: true, get: function () { return runTunnel_1.runTunnelMultiple; } }));
-const schedule_1 = __nccwpck_require__(8087);
-Object.defineProperty(exports, "scheduleTests", ({ enumerable: true, get: function () { return schedule_1.scheduleTests; } }));
+const schedule_1 = __nccwpck_require__(9371);
+Object.defineProperty(exports, "scheduleTestsByIds", ({ enumerable: true, get: function () { return schedule_1.scheduleTestsByIds; } }));
+Object.defineProperty(exports, "scheduleSuite", ({ enumerable: true, get: function () { return schedule_1.scheduleSuite; } }));
 
 
 /***/ }),
 
-/***/ 9362:
+/***/ 1778:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -5688,6 +5689,7 @@ function runTunnel({ url, cloudflaredPath = "cloudflared", }) {
     const urlObj = new URL(url);
     const cloudflared = (0, child_process_1.spawn)(cloudflaredPath, [
         "tunnel",
+        "--no-autoupdate",
         "--url",
         url,
         "--http-host-header",
@@ -5728,7 +5730,7 @@ function runTunnelMultiple({ urls, cloudflaredPath = "cloudflared", }) {
     return __awaiter(this, void 0, void 0, function* () {
         if (urls.length === 0)
             return [];
-        console.log("Starting proxy tunnels");
+        console.log(`Starting proxy tunnels using ${cloudflaredPath}`);
         const tunnelPromises = urls.map((url) => __awaiter(this, void 0, void 0, function* () {
             const tunnel = runTunnel({ url, cloudflaredPath });
             tunnel.urlPromise.then((url) => {
@@ -5748,7 +5750,7 @@ exports.runTunnelMultiple = runTunnelMultiple;
 
 /***/ }),
 
-/***/ 8087:
+/***/ 9371:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -5767,7 +5769,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.scheduleTests = void 0;
+exports.scheduleSuite = exports.scheduleTestsByIds = exports.resolveSuite = void 0;
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const chalk_1 = __importDefault(__nccwpck_require__(8818));
 const hasStdout = typeof ((_a = process === null || process === void 0 ? void 0 : process.stdout) === null || _a === void 0 ? void 0 : _a.clearLine) === "function";
@@ -5862,16 +5864,37 @@ class ConsoleLineManager {
         });
     }
 }
-function scheduleTests(props) {
+function resolveSuite({ orgId, suiteId, authToken, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield axios_1.default.post(`https://api.useclickai.com/api/suites/resolve`, { _id: suiteId }, {
+                headers: Object.assign({ Authorization: `Bearer ${authToken}` }, (orgId && { organization: orgId })),
+            });
+            return result.data;
+        }
+        catch (e) {
+            if (axios_1.default.isAxiosError(e)) {
+                throw e;
+            }
+            else if (e instanceof Error) {
+                throw new Error(e.message);
+            }
+            else {
+                throw new Error("An unknown error occurred");
+            }
+        }
+    });
+}
+exports.resolveSuite = resolveSuite;
+function scheduleTestsByIds(props) {
     return __awaiter(this, void 0, void 0, function* () {
         const { automationIds, inputMap, filter, authToken, proxyMap } = props;
         try {
-            const result = yield axios_1.default.post(`https://api.useclickai.com/automations/runSync`, 
-            // `http://localhost:8080/automations/runSync`,
-            { automationIds, input: inputMap, filter, proxyMap }, {
+            const result = yield axios_1.default.post(`https://api.useclickai.com/automations/runSync`, { automationIds, input: inputMap, filter, proxyMap }, {
                 headers: Object.assign(Object.assign({ Authorization: `Bearer ${authToken}` }, (props.orgId && { organization: props.orgId })), { ContentType: "application/json" }),
                 responseType: "stream",
             });
+            console.log("Starting tests...");
             let fullData = "";
             let initArray;
             const titleMap = new Map();
@@ -5902,6 +5925,7 @@ function scheduleTests(props) {
                     const buffer = data instanceof Buffer ? data : Buffer.from(data);
                     // buffer to string
                     fullData += buffer.toString("utf-8");
+                    // console.log(buffer.toString("utf-8"));
                     parseBatches();
                 });
                 stream.on("end", () => {
@@ -5930,7 +5954,40 @@ function scheduleTests(props) {
         }
     });
 }
-exports.scheduleTests = scheduleTests;
+exports.scheduleTestsByIds = scheduleTestsByIds;
+function scheduleSuite({ authToken, orgId, suiteId, inputMap, proxyMap, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { name, steps } = yield resolveSuite({
+            orgId,
+            suiteId,
+            authToken,
+        }).catch((e) => {
+            console.error(e);
+            process.exit(1);
+        });
+        const batches = steps.map((r) => r.toRun.map((t) => t._id));
+        console.log(chalk_1.default.green `Suite: ${name}`);
+        for (let i = 0; i < batches.length; i++) {
+            const batch = batches[i];
+            console.log(chalk_1.default.green `Batch ${i + 1} of ${batches.length}: ${batch.length} tests`);
+            const result = yield scheduleTestsByIds({
+                proxyMap,
+                inputMap,
+                authToken,
+                orgId,
+                automationIds: batch,
+            });
+            if (result.status === "error") {
+                console.error(chalk_1.default.red `Batch ${i + 1} exited with error`);
+                if (i !== batches.length - 1) {
+                    console.error(chalk_1.default.red `Since this is a batched suite, the next batch will not be scheduled.`);
+                }
+                throw new Error("Tests are failed");
+            }
+        }
+    });
+}
+exports.scheduleSuite = scheduleSuite;
 
 
 /***/ }),
@@ -34181,7 +34238,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const clickai = __importStar(__nccwpck_require__(1859));
+const clickai = __importStar(__nccwpck_require__(2395));
 const tunnel_1 = __nccwpck_require__(4952);
 function checkIsUrl(url) {
     try {
@@ -34195,8 +34252,8 @@ function checkIsUrl(url) {
 async function run() {
     let stopTunnelArray = [];
     try {
-        const tests = core.getInput('tests', {
-            required: false,
+        const suiteId = core.getInput('suiteId', {
+            required: true,
             trimWhitespace: true
         });
         const apiKey = core.getInput('apiKey', {
@@ -34231,17 +34288,6 @@ async function run() {
             });
         }
         console.log('Proxy started, scheduling tests');
-        let automationIds = [[]];
-        if (tests) {
-            automationIds = JSON.parse(tests.trim());
-            // Verify automationIds is string[][]
-            if (!Array.isArray(automationIds) ||
-                !automationIds.every(Array.isArray) ||
-                !automationIds.flat().every(id => typeof id === 'string')) {
-                throw new Error('tests must be an array of arrays of strings');
-            }
-            core.info(`Running tests: ${automationIds.flat().join(', ')}`);
-        }
         const inputMap = input
             .trim()
             .split(/[\r\n,]+/)
@@ -34252,29 +34298,21 @@ async function run() {
             acc[key] = value;
             return acc;
         }, {});
-        for (const automationArray of automationIds) {
-            const result = await clickai.scheduleTests({
-                authToken: apiKey,
-                ...(automationArray.length > 0 && { automationIds: automationArray }),
-                inputMap,
-                proxyMap
-            });
-            core.info(`Tests completed with status: ${result.status}`);
-            if (result.status === 'error') {
-                throw new Error('Tests failed');
-            }
-            core.info(`All tests: ${automationArray.join(', ')} passed`);
-        }
+        await clickai.scheduleSuite({
+            authToken: apiKey,
+            suiteId,
+            inputMap,
+            proxyMap
+        });
         core.info(`All tests passed`);
     }
     catch (error) {
-        // Fail the workflow run if an error occurs
-        stopTunnelArray.forEach(stopTunnel => stopTunnel());
-        stopTunnelArray.length = 0;
         core.setFailed(error.message);
     }
-    stopTunnelArray.forEach(stopTunnel => stopTunnel());
-    stopTunnelArray.length = 0;
+    finally {
+        stopTunnelArray.forEach(stopTunnel => stopTunnel());
+        stopTunnelArray.length = 0;
+    }
 }
 exports.run = run;
 

@@ -15,10 +15,11 @@ export async function run() {
   let stopTunnelArray: (() => void)[] = [];
 
   try {
-    const tests = core.getInput('tests', {
-      required: false,
+    const suiteId = core.getInput('suiteId', {
+      required: true,
       trimWhitespace: true
     });
+
     const apiKey = core.getInput('apiKey', {
       required: true,
       trimWhitespace: true
@@ -60,23 +61,6 @@ export async function run() {
 
     console.log('Proxy started, scheduling tests');
 
-    let automationIds = [[]];
-
-    if (tests) {
-      automationIds = JSON.parse(tests.trim());
-
-      // Verify automationIds is string[][]
-      if (
-        !Array.isArray(automationIds) ||
-        !automationIds.every(Array.isArray) ||
-        !automationIds.flat().every(id => typeof id === 'string')
-      ) {
-        throw new Error('tests must be an array of arrays of strings');
-      }
-
-      core.info(`Running tests: ${automationIds.flat().join(', ')}`);
-    }
-
     const inputMap = input
       .trim()
       .split(/[\r\n,]+/)
@@ -91,29 +75,17 @@ export async function run() {
         {} as Record<string, string>
       );
 
-    for (const automationArray of automationIds) {
-      const result = await clickai.scheduleTests({
-        authToken: apiKey,
-        ...(automationArray.length > 0 && { automationIds: automationArray }),
-        inputMap,
-        proxyMap
-      });
-      core.info(`Tests completed with status: ${result.status}`);
-
-      if (result.status === 'error') {
-        throw new Error('Tests failed');
-      }
-
-      core.info(`All tests: ${automationArray.join(', ')} passed`);
-    }
-
+    await clickai.scheduleSuite({
+      authToken: apiKey,
+      suiteId,
+      inputMap,
+      proxyMap
+    });
     core.info(`All tests passed`);
   } catch (error) {
-    // Fail the workflow run if an error occurs
+    core.setFailed((error as Error).message);
+  } finally {
     stopTunnelArray.forEach(stopTunnel => stopTunnel());
     stopTunnelArray.length = 0;
-    core.setFailed((error as Error).message);
   }
-  stopTunnelArray.forEach(stopTunnel => stopTunnel());
-  stopTunnelArray.length = 0;
 }
