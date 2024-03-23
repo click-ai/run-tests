@@ -5,7 +5,7 @@
 ```yaml
 
 - name: Run tests
-  uses: click-ai/run-tests@v1
+  uses: click-ai/run-tests@v2
   with:
     apiKey: ${{ secrets.CLICK_AI_API_KEY }}
     suiteId: 659dc7bcdceb9d988c9aa790 # Required, the suite ID to run the tests
