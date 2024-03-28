@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
+import fs from 'fs';
 
 function checkIsUrl(url: string) {
   try {
@@ -44,6 +45,32 @@ export async function run() {
       .split(/[\r\n,]+/)
       .map(line => line.trim())
       .filter(line => line.length > 0);
+
+    // Assuming you're running this script in a GitHub Actions environment
+    const eventPath = process.env.GITHUB_EVENT_PATH;
+    if (!eventPath) {
+      console.error('GITHUB_EVENT_PATH environment variable is not set.');
+      process.exit(1);
+    }
+
+    // Read the event payload
+    fs.readFile(eventPath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Error reading event payload:', err);
+        process.exit(1);
+      }
+
+      // Parse the JSON data
+      const eventData = JSON.parse(data);
+
+      // Access the head_commit message
+      const commitMessage = eventData?.head_commit?.message;
+      if (commitMessage) {
+        console.log('Head commit message:', commitMessage);
+      } else {
+        console.log('Head commit message not found.');
+      }
+    });
 
     exec.exec('npx', [
       'clickai',
