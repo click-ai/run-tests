@@ -1,6 +1,5 @@
 import * as core from '@actions/core';
-import * as clickai from 'clickai';
-import { downloadCloudflared } from './tunnel';
+import * as exec from '@actions/exec';
 
 function checkIsUrl(url: string) {
   try {
@@ -40,48 +39,23 @@ export async function run() {
       .map(row => row.trim())
       .filter(checkIsUrl);
 
-    const cloudflaredPath = await downloadCloudflared();
-
-    console.log('Starting proxy to urls:', proxyUrls.join(', '));
-
-    let proxyMap: Record<string, string> | undefined = undefined;
-
-    if (proxyUrls.length > 0) {
-      const res = await clickai.runTunnelMultiple({
-        urls: proxyUrls,
-        cloudflaredPath
-      });
-
-      res.forEach(tunnel => {
-        if (!proxyMap) proxyMap = {};
-        proxyMap[tunnel.url] = tunnel.publicUrl;
-        stopTunnelArray.push(tunnel.stop);
-      });
-    }
-
-    console.log('Proxy started, scheduling tests');
-
     const inputMap = input
       .trim()
       .split(/[\r\n,]+/)
       .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .map(line => line.split('='))
-      .reduce(
-        (acc, [key, value]) => {
-          acc[key] = value;
-          return acc;
-        },
-        {} as Record<string, string>
-      );
+      .filter(line => line.length > 0);
 
-    await clickai.scheduleSuite({
-      authToken: apiKey,
+    exec.exec('npx', [
+      'clickai',
+      'test',
+      '--suite',
       suiteId,
-      inputMap,
-      proxyMap
-    });
-    core.info(`All tests passed`);
+      ...proxyUrls.flatMap(url => ['--url', url]),
+      ...inputMap.flatMap(input => ['--input', input]),
+      '--auth-token',
+      apiKey,
+      '--install-deps'
+    ]);
   } catch (error) {
     core.setFailed((error as Error).message);
   } finally {
