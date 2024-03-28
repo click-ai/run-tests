@@ -24,6 +24,7 @@
   "scripts": {
     "build": "rm -rf dist && yarn run bundle",
     "bundle": "ncc build src/index.ts",
+    "release": "yarn run build && git add . && git commit -m \"chore: release $(npm pkg get version)\" && git push && git tag -d v1 || true && git tag v1 && git push origin v1 --force",
     "test": "(jest && make-coverage-badge --output-path ./badges/coverage.svg) || make-coverage-badge --output-path ./badges/coverage.svg"
   },
   "license": "MIT",
@@ -59,8 +60,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/http-client": "^2.2.0",
     "@actions/io": "^1.1.3",
-    "@actions/tool-cache": "^2.0.1",
-    "clickai": "^1.0.37"
+    "@actions/tool-cache": "^2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",
