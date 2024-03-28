@@ -24,7 +24,9 @@
   "scripts": {
     "build": "rm -rf dist && yarn run bundle",
     "bundle": "ncc build src/index.ts",
-    "release": "yarn run build && git add . && git commit -m \"chore: release $(npm pkg get version)\" && git push && git tag -d v1 || true && git tag v1 && git push origin v1 --force",
+    "release": "yarn git:push && yarn git:tag",
+    "git:push": "yarn run build && git add . && git commit -m \"chore: release $(npm pkg get version)\" && git push",
+    "git:tag": "git tag -d v2 || true && git tag v2 && git push origin 21 --force",
     "test": "(jest && make-coverage-badge --output-path ./badges/coverage.svg) || make-coverage-badge --output-path ./badges/coverage.svg"
   },
   "license": "MIT",
