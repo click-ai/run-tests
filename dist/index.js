@@ -25968,7 +25968,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const child_process_1 = __nccwpck_require__(2081);
 function checkIsUrl(url) {
     try {
         new URL(url);
@@ -26006,18 +26005,6 @@ async function run() {
             .split(/[\r\n,]+/)
             .map(line => line.trim())
             .filter(line => line.length > 0);
-        // Get the commit SHA from the GITHUB_SHA environment variable
-        const commitSHA = process.env.GITHUB_SHA;
-        // Construct and execute the Git command to get the commit message
-        try {
-            const commitMessage = (0, child_process_1.execSync)(`git log --format=%B -n 1 ${commitSHA}`, {
-                encoding: 'utf8'
-            });
-            console.log(`Commit message: ${commitMessage}`);
-        }
-        catch (error) {
-            console.error(`Error getting commit message: ${error}`);
-        }
         exec.exec('npx', [
             'clickai',
             'test',

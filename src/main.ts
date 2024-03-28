@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import { execSync } from 'child_process';
 
-
 function checkIsUrl(url: string) {
   try {
     new URL(url);
@@ -46,20 +45,6 @@ export async function run() {
       .split(/[\r\n,]+/)
       .map(line => line.trim())
       .filter(line => line.length > 0);
-
-
-    // Get the commit SHA from the GITHUB_SHA environment variable
-    const commitSHA = process.env.GITHUB_SHA;
-
-    // Construct and execute the Git command to get the commit message
-    try {
-      const commitMessage = execSync(`git log --format=%B -n 1 ${commitSHA}`, {
-        encoding: 'utf8'
-      });
-      console.log(`Commit message: ${commitMessage}`);
-    } catch (error) {
-      console.error(`Error getting commit message: ${error}`);
-    }
 
     exec.exec('npx', [
       'clickai',
