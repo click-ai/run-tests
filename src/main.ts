@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import fs from 'fs';
+import { execSync } from 'child_process';
+
 
 function checkIsUrl(url: string) {
   try {
@@ -46,31 +47,19 @@ export async function run() {
       .map(line => line.trim())
       .filter(line => line.length > 0);
 
-    // Assuming you're running this script in a GitHub Actions environment
-    const eventPath = process.env.GITHUB_EVENT_PATH;
-    if (!eventPath) {
-      console.error('GITHUB_EVENT_PATH environment variable is not set.');
-      process.exit(1);
+
+    // Get the commit SHA from the GITHUB_SHA environment variable
+    const commitSHA = process.env.GITHUB_SHA;
+
+    // Construct and execute the Git command to get the commit message
+    try {
+      const commitMessage = execSync(`git log --format=%B -n 1 ${commitSHA}`, {
+        encoding: 'utf8'
+      });
+      console.log(`Commit message: ${commitMessage}`);
+    } catch (error) {
+      console.error(`Error getting commit message: ${error}`);
     }
-
-    // Read the event payload
-    fs.readFile(eventPath, 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading event payload:', err);
-        process.exit(1);
-      }
-
-      // Parse the JSON data
-      const eventData = JSON.parse(data);
-
-      // Access the head_commit message
-      const commitMessage = eventData?.head_commit?.message;
-      if (commitMessage) {
-        console.log('Head commit message:', commitMessage);
-      } else {
-        console.log('Head commit message not found.');
-      }
-    });
 
     exec.exec('npx', [
       'clickai',

@@ -25964,14 +25964,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-const fs_1 = __importDefault(__nccwpck_require__(7147));
+const child_process_1 = __nccwpck_require__(2081);
 function checkIsUrl(url) {
     try {
         new URL(url);
@@ -26009,29 +26006,18 @@ async function run() {
             .split(/[\r\n,]+/)
             .map(line => line.trim())
             .filter(line => line.length > 0);
-        // Assuming you're running this script in a GitHub Actions environment
-        const eventPath = process.env.GITHUB_EVENT_PATH;
-        if (!eventPath) {
-            console.error('GITHUB_EVENT_PATH environment variable is not set.');
-            process.exit(1);
+        // Get the commit SHA from the GITHUB_SHA environment variable
+        const commitSHA = process.env.GITHUB_SHA;
+        // Construct and execute the Git command to get the commit message
+        try {
+            const commitMessage = (0, child_process_1.execSync)(`git log --format=%B -n 1 ${commitSHA}`, {
+                encoding: 'utf8'
+            });
+            console.log(`Commit message: ${commitMessage}`);
         }
-        // Read the event payload
-        fs_1.default.readFile(eventPath, 'utf8', (err, data) => {
-            if (err) {
-                console.error('Error reading event payload:', err);
-                process.exit(1);
-            }
-            // Parse the JSON data
-            const eventData = JSON.parse(data);
-            // Access the head_commit message
-            const commitMessage = eventData?.head_commit?.message;
-            if (commitMessage) {
-                console.log('Head commit message:', commitMessage);
-            }
-            else {
-                console.log('Head commit message not found.');
-            }
-        });
+        catch (error) {
+            console.error(`Error getting commit message: ${error}`);
+        }
         exec.exec('npx', [
             'clickai',
             'test',
